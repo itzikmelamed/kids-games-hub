@@ -63,27 +63,11 @@ function onCleanup(fn) { cleanupFns.push(fn); }
 function runCleanup() { cleanupFns.forEach(f => { try { f(); } catch (e) {} }); cleanupFns = []; }
 
 let soundOn = true;
-let heVoice = null;
-function pickVoice() {
-  if (!('speechSynthesis' in window)) return;
-  const vs = speechSynthesis.getVoices();
-  heVoice = vs.find(v => v.lang && v.lang.toLowerCase().startsWith('he')) || null;
-}
-if ('speechSynthesis' in window) {
-  pickVoice();
-  speechSynthesis.onvoiceschanged = pickVoice;
-}
 function speak(text, opts) {
-  if (!soundOn || !('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'he-IL';
-  if (heVoice) u.voice = heVoice;
-  u.rate = (opts && opts.rate) || 0.9;
-  u.pitch = 1.15;
-  speechSynthesis.speak(u);
+  if (!soundOn) return;
+  window.KidsAudio.say(text, opts);
 }
-function stopSpeak() { if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+function stopSpeak() { window.KidsAudio.stop(); }
 
 // current spoken task per screen - the big speaker button reads this aloud
 let currentTask = '';
@@ -93,14 +77,8 @@ function setTask(spoken, visible) {
   if (pb && pb.firstChild) pb.firstChild.textContent = visible || spoken;
 }
 function speakTask() {
-  if (!currentTask || !('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(currentTask);
-  u.lang = 'he-IL';
-  if (heVoice) u.voice = heVoice;
-  u.rate = 0.9;
-  u.pitch = 1.15;
-  speechSynthesis.speak(u);
+  if (!currentTask) return;
+  window.KidsAudio.say(currentTask, { rate: 0.9 });
 }
 
 function el(tag, cls, text) {
