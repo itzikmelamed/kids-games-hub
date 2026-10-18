@@ -81,12 +81,17 @@
     return load(f).then(url => new Promise((res, rej) => {
       if (my !== token) return res();
       audio.setAttribute('data-clip', f);
-      const done = () => { audio.removeEventListener('ended', done); audio.removeEventListener('error', fail); res(); };
-      const fail = () => { audio.removeEventListener('ended', done); audio.removeEventListener('error', fail); rej(new Error('audio error')); };
-      audio.addEventListener('ended', done); audio.addEventListener('error', fail);
+      let timer = null;
+      const cleanup = () => { clearTimeout(timer); audio.removeEventListener('ended', done); audio.removeEventListener('error', fail); audio.removeEventListener('playing', started); };
+      const done = () => { cleanup(); res(); };
+      const fail = () => { cleanup(); rej(new Error('audio error')); };
+      // if playback never starts (blocked or stalled), give up so the speech fallback can take over
+      const started = () => { clearTimeout(timer); timer = setTimeout(fail, 20000); };
+      timer = setTimeout(fail, 4000);
+      audio.addEventListener('ended', done); audio.addEventListener('error', fail); audio.addEventListener('playing', started);
       audio.src = url;
       const p = audio.play();
-      if (p && p.catch) p.catch(e => { audio.removeEventListener('ended', done); audio.removeEventListener('error', fail); rej(e); });
+      if (p && p.catch) p.catch(e => { cleanup(); rej(e); });
     }));
   }
   function say(text, opts) {
