@@ -501,6 +501,10 @@ function renderShop() {
     target = randInt(1, 10);
     mode = Math.random() < 0.35 ? 'sort' : 'count';
     top.textContent = customer.emoji;
+    var pb = app.querySelector('.prompt-bar');
+    if (pb) pb.firstChild.textContent = mode === 'count'
+      ? customer.name + ' רוצה ' + target + ' ' + fruit.emoji
+      : 'שימי רק ' + fruit.plural + ' ' + fruit.emoji + ' בסל!';
     if (mode === 'count') {
       done.classList.remove('hidden');
       bLabel.textContent = 'הסל שלי 🧺 (0)';
