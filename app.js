@@ -85,6 +85,24 @@ function speak(text, opts) {
 }
 function stopSpeak() { if ('speechSynthesis' in window) speechSynthesis.cancel(); }
 
+// current spoken task per screen - the big speaker button reads this aloud
+let currentTask = '';
+function setTask(spoken, visible) {
+  currentTask = spoken;
+  const pb = app.querySelector('.prompt-bar');
+  if (pb && pb.firstChild) pb.firstChild.textContent = visible || spoken;
+}
+function speakTask() {
+  if (!currentTask || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(currentTask);
+  u.lang = 'he-IL';
+  if (heVoice) u.voice = heVoice;
+  u.rate = 0.9;
+  u.pitch = 1.15;
+  speechSynthesis.speak(u);
+}
+
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -140,12 +158,17 @@ function shell(title, contentNode, opts) {
   bar.append(home, t, sp, snd);
   const scr = el('div', 'screen');
   if (opts && opts.prompt !== undefined) {
+    currentTask = opts.prompt;
     const pb = el('div', 'prompt-bar');
-    const ptxt = el('div', '', opts.prompt);
+    const ptxt = el('div', 'prompt-text', opts.prompt);
     ptxt.style.flex = '1';
     const again = el('button', 'speak-again', '🔊');
-    again.setAttribute('aria-label', 'שמע שוב');
-    again.onclick = () => speak(pb.firstChild.textContent);
+    again.setAttribute('aria-label', 'שמעי את המשימה שוב');
+    again.onclick = () => {
+      speakTask();
+      again.classList.add('speaking');
+      setTimeout(() => again.classList.remove('speaking'), 900);
+    };
     pb.append(ptxt, again);
     scr.appendChild(pb);
   }
@@ -161,6 +184,14 @@ function renderHome() {
   const crown = el('div', 'home-crown', '🏰👸🦄');
   const h1 = el('h1', '', 'משחקי הנסיכות והחיות');
   const sub = el('div', 'subtitle', 'בחרי משחק ומתחילים!');
+  currentTask = 'בחרי משחק ומתחילים!';
+  const hearHome = el('button', 'speak-again home-speaker', '🔊');
+  hearHome.setAttribute('aria-label', 'שמעי מה עושים');
+  hearHome.onclick = () => {
+    speakTask();
+    hearHome.classList.add('speaking');
+    setTimeout(() => hearHome.classList.remove('speaking'), 900);
+  };
   const grid = el('div', 'games-grid');
   const games = [
     { emoji: '🎨', name: 'בונים עולם', fn: renderWorld },
@@ -179,7 +210,7 @@ function renderHome() {
   const snd = el('button', 'pill-btn', soundOn ? '🔊' : '🔇');
   snd.style.marginTop = '20px';
   snd.onclick = () => { soundOn = !soundOn; snd.textContent = soundOn ? '🔊' : '🔇'; if (!soundOn) stopSpeak(); };
-  home.append(crown, h1, sub, grid, snd);
+  home.append(crown, h1, sub, hearHome, grid, snd);
   app.appendChild(home);
 }
 
@@ -294,12 +325,14 @@ function renderWorld() {
       mission = { type: 'where', tool: target.tool };
       banner.textContent = '🎯 איפה ה' + target.tool.shape.name + ' ה' + target.tool.color.name + '? געי בו!';
       banner.classList.remove('hidden');
+      setTask('איפה ה' + target.tool.shape.name + ' ה' + target.tool.color.name + '? געי בו!', banner.textContent);
       speak('איפה ה' + target.tool.shape.name + ' ה' + target.tool.color.name + '?');
     } else {
       const shape = pick(SHAPES), color = pick(COLORS);
       mission = { type: 'place', shape, color };
       banner.textContent = '🎯 משימה: שימי ' + shape.name + ' ' + color.name + ' על המסך';
       banner.classList.remove('hidden');
+      setTask('שימי ' + shape.name + ' ' + color.name + ' על המסך', banner.textContent);
       speak('שימי ' + shape.name + ' ' + color.name + ' על המסך');
       palette.querySelectorAll('.palette-item').forEach(b => b.classList.remove('selected'));
       selected = null;
@@ -333,13 +366,14 @@ function renderWorld() {
   missionBtn.onclick = newMission;
   const clearBtn = el('button', 'pill-btn', '🧹 ניקוי');
   clearBtn.style.fontSize = '18px';
-  clearBtn.onclick = () => { placed.splice(0).forEach(p => p.node.remove()); mission = null; banner.classList.add('hidden'); speak('המסך נקי!'); };
+  clearBtn.onclick = () => { placed.splice(0).forEach(p => p.node.remove()); mission = null; banner.classList.add('hidden'); setTask('בחרי צורה או חיה, וגעי במסך כדי לשים אותה בעולם שלך', 'בחרי צורה או חיה וגעי במסך'); speak('המסך נקי!'); };
   btnRow.append(missionBtn, clearBtn);
 
   wrap.append(palette, area, btnRow);
   wrap.style.cssText = 'display:flex;flex-direction:column;flex:1;';
   area.style.minHeight = '280px';
   shell('בונים עולם', wrap, { prompt: 'בחרי צורה או חיה וגעי במסך כדי לשים אותה' });
+  setTask('בחרי צורה או חיה, וגעי במסך כדי לשים אותה בעולם שלך', 'בחרי צורה או חיה וגעי במסך כדי לשים אותה');
   setTimeout(() => speak('בחרי צורה או חיה, וגעי במסך כדי לשים אותה בעולם שלך'), 300);
 }
 
@@ -347,7 +381,6 @@ function renderWorld() {
 function renderBalloons() {
   const area = el('div', 'game-area');
   let round = 0, total = 5, lock = false, target = null;
-  let promptBarHolder = null;
 
   function balloonNode(color, label) {
     const b = el('div', 'balloon');
@@ -384,7 +417,7 @@ function renderBalloons() {
       labels = ns.map(String);
       promptText = 'פוצצי את הבלון עם המספר ' + target.num;
     }
-    if (promptBarHolder) promptBarHolder.textContent = promptText;
+    setTask(promptText);
     colorSet.forEach((c, i) => {
       const label = mode === 'color' ? '' : labels[i];
       const b = balloonNode(c, label);
@@ -411,6 +444,7 @@ function renderBalloons() {
   }
   function finish() {
     area.innerHTML = '';
+    setTask('אלופה! געי על עוד פעם כדי לשחק שוב', '🎉 עוד פעם?');
     celebrate('אלופה! פוצצת את כל הבלונים!');
     const again = el('button', 'big-action', '🎈 עוד פעם');
     again.onclick = () => { round = 0; again.remove(); newRound(); };
@@ -419,7 +453,6 @@ function renderBalloons() {
     area.appendChild(again);
   }
   shell('בלונים', area, { prompt: 'מכינה בלונים...' });
-  promptBarHolder = app.querySelector('.prompt-bar').firstChild;
   newRound();
 }
 
@@ -454,6 +487,7 @@ function renderMemory() {
             open = []; lock = false;
             if (matched === 6) {
               setTimeout(() => {
+                setTask('כל הכבוד! מצאת את כל הזוגות! געי על עוד פעם כדי לשחק שוב', '🎉 עוד פעם?');
                 celebrate('כל הכבוד! מצאת את כל הזוגות!');
                 const again = el('button', 'big-action', '🧠 עוד פעם');
                 again.onclick = renderMemory;
@@ -473,6 +507,7 @@ function renderMemory() {
   });
   area.appendChild(grid);
   shell('משחק זיכרון', area, { prompt: 'מצאי זוגות של חיות ונסיכות' });
+  setTask('מצאי זוגות! הפכי שני קלפים ומצאי אותם', 'מצאי זוגות של חיות ונסיכות');
   setTimeout(() => speak('מצאי זוגות! הפכי שני קלפים ומצאי אותם'), 300);
 }
 
@@ -501,10 +536,12 @@ function renderShop() {
     target = randInt(1, 10);
     mode = Math.random() < 0.35 ? 'sort' : 'count';
     top.textContent = customer.emoji;
-    var pb = app.querySelector('.prompt-bar');
-    if (pb) pb.firstChild.textContent = mode === 'count'
-      ? customer.name + ' רוצה ' + target + ' ' + fruit.emoji
-      : 'שימי רק ' + fruit.plural + ' ' + fruit.emoji + ' בסל!';
+    if (mode === 'count') {
+      setTask(customer.name + ' אומר: אני רוצה ' + (fruit.gender === 'f' ? NUM_F[target - 1] : NUM_M[target - 1]) + ' ' + (target === 1 ? fruit.name : fruit.plural) + ', בבקשה!',
+        customer.name + ' רוצה ' + target + ' ' + fruit.emoji);
+    } else {
+      setTask('שימי רק ' + fruit.plural + ' בסל!', 'שימי רק ' + fruit.plural + ' ' + fruit.emoji + ' בסל!');
+    }
     if (mode === 'count') {
       done.classList.remove('hidden');
       bLabel.textContent = 'הסל שלי 🧺 (0)';
@@ -574,6 +611,7 @@ function renderShop() {
   };
   function finish() {
     shelf.innerHTML = ''; done.classList.add('hidden');
+    setTask('חנות מעולה! געי על עוד פעם כדי לשחק שוב', '🎉 עוד פעם?');
     celebrate('חנות מעולה! כל הכבוד!');
     const again = el('button', 'big-action', '🍎 עוד פעם');
     again.onclick = renderShop;
@@ -609,6 +647,7 @@ function renderLettersLearn() {
       grid.appendChild(c);
     });
     area.appendChild(grid);
+    setTask('בחרי אות ונלמד אותה!', 'בחרי אות');
     setTimeout(() => speak('בחרי אות ונלמד אותה!'), 200);
   }
   function showLetter(letter) {
@@ -626,6 +665,7 @@ function renderLettersLearn() {
     gridB.onclick = showGrid;
     nav.append(prev, gridB, next);
     area.append(card, nav);
+    setTask(l + '. ' + word, l + ' - ' + word);
     speak(l + '. ' + word);
   }
   const wrap = el('div');
@@ -642,8 +682,7 @@ function renderLettersQuiz() {
     area.innerHTML = '';
     const opts = shuffle(LETTERS).slice(0, 4);
     const target = pick(opts);
-    const pb = app.querySelector('.prompt-bar');
-    if (pb) pb.firstChild.textContent = 'איפה האות ' + target[0] + '? (' + target[2] + ' ' + target[1] + ')';
+    setTask('איפה האות ' + target[0] + '?', 'איפה האות ' + target[0] + '? (' + target[2] + ' ' + target[1] + ')');
     const qc = el('div', 'quiz-choices');
     opts.forEach(([l]) => {
       const b = el('button', 'quiz-choice', l);
@@ -668,6 +707,7 @@ function renderLettersQuiz() {
   }
   function finish() {
     area.innerHTML = '';
+    setTask('אלופה! געי על עוד פעם כדי לשחק שוב', '🎉 עוד פעם?');
     celebrate('אלופה! יודעת אותיות!');
     const again = el('button', 'big-action', '🔤 עוד פעם');
     again.onclick = () => { round = 0; again.remove(); newRound(); };
@@ -697,6 +737,7 @@ function renderNumbersLearn() {
       grid.appendChild(c);
     }
     area.appendChild(grid);
+    setTask('בחרי מספר ונספור ביחד!', 'בחרי מספר');
     setTimeout(() => speak('בחרי מספר ונספור ביחד!'), 200);
   }
   function showNumber(n) {
@@ -723,6 +764,7 @@ function renderNumbersLearn() {
     gridB.onclick = showGrid;
     nav.append(prev, gridB, next);
     area.append(card, nav);
+    setTask(NUM_F[n - 1], String(n) + ' - ' + NUM_F[n - 1]);
     spans.forEach((s, i) => {
       timers.push(setTimeout(() => {
         spans.forEach(x => x.classList.remove('lit'));
@@ -772,8 +814,7 @@ function renderNumbersQuiz() {
         qc.appendChild(b);
       });
       area.appendChild(qc);
-      const pb = app.querySelector('.prompt-bar');
-      if (pb) pb.firstChild.textContent = 'כמה ' + em + ' את רואה?';
+      setTask('כמה את רואה? ספרי וגעי במספר הנכון', 'כמה ' + em + ' את רואה?');
       setTimeout(() => speak('כמה את רואה? ספרי וגעי במספר הנכון'), 250);
     } else {
       const n = randInt(1, 10);
@@ -797,13 +838,13 @@ function renderNumbersQuiz() {
         qc.appendChild(b);
       });
       area.appendChild(qc);
-      const pb = app.querySelector('.prompt-bar');
-      if (pb) pb.firstChild.textContent = 'איפה המספר ' + n + '?';
+      setTask('איפה המספר ' + n + '?');
       setTimeout(() => speak('איפה המספר ' + n + '?'), 250);
     }
   }
   function finish() {
     area.innerHTML = '';
+    setTask('אלופה! געי על עוד פעם כדי לשחק שוב', '🎉 עוד פעם?');
     celebrate('אלופה! יודעת לספור!');
     const again = el('button', 'big-action', '🔢 עוד פעם');
     again.onclick = () => { round = 0; again.remove(); newRound(); };
