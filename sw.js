@@ -1,4 +1,4 @@
-const CACHE = 'kids-games-v2';
+const CACHE = 'kids-games-v3';
 const ASSETS = ['.', 'index.html', 'styles.css', 'app.js', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
