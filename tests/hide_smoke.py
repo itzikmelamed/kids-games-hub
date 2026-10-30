@@ -4,13 +4,13 @@ from pathlib import Path
 os.chdir(Path(__file__).resolve().parents[1])
 class Quiet(http.server.SimpleHTTPRequestHandler):
  def log_message(self,*a):pass
-s=socketserver.TCPServer(('127.0.0.1',8781),Quiet);threading.Thread(target=s.serve_forever,daemon=True).start()
+s=socketserver.TCPServer(('127.0.0.1',8796),Quiet);threading.Thread(target=s.serve_forever,daemon=True).start()
 async def main():
  async with async_playwright() as p:
   b=await p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--no-sandbox'])
   pg=await b.new_page(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,reduced_motion='reduce')
   errors=[];pg.on('pageerror',lambda e:errors.append(str(e)))
-  await pg.goto(os.getenv('TEST_URL','http://127.0.0.1:8781'))
+  await pg.goto(os.getenv('TEST_URL','http://127.0.0.1:8796'))
   await pg.wait_for_selector('.game-card')
   assert await pg.locator('.game-card').count()==8
   await pg.get_by_role('button',name='🌿 מחבואים עם חיות',exact=True).click()
@@ -18,8 +18,8 @@ async def main():
   await pg.get_by_role('button',name='מתחילים מחבואים',exact=True).click()
   await pg.screenshot(path='/tmp/hide-look.png')
   # Entire new spoken vocabulary has an embedded audio plan.
-  plans=await pg.evaluate('Object.keys(AUDIO_CLIPS).filter(x=>x.includes("שיח")||x.includes("מחבואים")||x.includes("לחצי")||x.includes("מסתתרת")).map(x=>KidsAudio.plan(x))')
-  assert all(plans)
+  plans=await pg.evaluate('Object.entries(AUDIO_CLIPS).filter(([k,v])=>v.startsWith("h-")).map(([k,v])=>({key:k,file:v,data:!!AUDIO_DATA[v]}))')
+  assert len(plans)==5 and all(x['data'] for x in plans)
   for n in range(6):
    assert await pg.locator('.hide-bush').count()==(2 if n<2 else 3)
    target=await pg.locator('.hide-critter svg').locator('..').locator('..').get_attribute('data-slot')
