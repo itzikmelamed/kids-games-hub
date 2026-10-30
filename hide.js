@@ -4,7 +4,7 @@ function renderHide() {
   const area=el('div','hide-area');
   shell('מחבואים עם חיות',area,{prompt:'החיות משחקות מחבואים! הסתכלי איפה החיה נמצאת. כשאת מוכנה, לחצי על העלה כדי להסתיר אותה.'});
   let active=true,round=0,target=0,locked=false;
-  const animals=shuffle(ANIMAL_FAMILIES);
+  const animals=shuffle(ANIMAL_FAMILIES).slice(0,6);
   onCleanup(()=>{active=false;});
   const intro=el('div','hide-intro');
   const art=el('div','hide-intro-art');art.innerHTML=familyArt('dog',true)+bushSVG();
