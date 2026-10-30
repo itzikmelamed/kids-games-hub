@@ -179,6 +179,7 @@ function renderHome() {
     { emoji: '🔤', name: 'אותיות', fn: renderLetters },
     { emoji: '🔢', name: 'מספרים', fn: renderNumbers },
     { emoji: '🐣', name: 'חיות והגורים שלהן', fn: renderFamilies },
+    { emoji: '🌿', name: 'מחבואים עם חיות', fn: renderHide },
   ];
   games.forEach(g => {
     const c = el('button', 'game-card');

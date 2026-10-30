@@ -12,7 +12,7 @@ async def main():
   page=await browser.new_page(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   await page.goto('http://127.0.0.1:8776')
-  assert await page.locator('.game-card').count()==7
+  assert await page.locator('.game-card').count()==8
   # Every new line must have an embedded clip plan; Android cannot rely on fallback.
   plans=await page.evaluate('Object.keys(window.AUDIO_CLIPS).filter(x=>x.includes("התינוק")||x.includes("לגורים")||x.includes("המשפחות")||x.includes("בחץ")).map(x=>[x,KidsAudio.plan(x)])')
   assert plans and all(x[1] for x in plans),plans
@@ -53,7 +53,7 @@ async def main():
   await page.get_by_role('button',name='מתחילים').click()
   assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
   await page.screenshot(path='/tmp/families-round-small.png')
-  print(json.dumps({'errors':errors,'audio':audio,'clipPlans':len(plans),'games':7,'rounds':6},ensure_ascii=False))
+  print(json.dumps({'errors':errors,'audio':audio,'clipPlans':len(plans),'games':8,'rounds':6},ensure_ascii=False))
   assert not errors,errors
   await browser.close()
 asyncio.run(main())

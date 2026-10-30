@@ -266,3 +266,37 @@ button { font-family: inherit; border: none; cursor: pointer; }
 .family-collected svg {width:50%;}
 @media(max-width:370px){.family-choices{gap:7px}.family-choice{min-height:108px}.family-parent{width:160px}.family-parent svg{height:125px}.family-area .family-progress{margin-bottom:6px}.topbar .pill-label{font-size:17px;padding:10px}.topbar{gap:6px;padding:8px}}
 @media(prefers-reduced-motion:reduce){.family-area *{animation:none!important;transition:none!important}}
+/* Hide-and-seek: child controls when to hide, with unlimited peeks. */
+.game-card:nth-child(8){border-color:#a6ce82;}
+.hide-area{width:100%;max-width:600px;margin:0 auto;text-align:center;}
+.hide-intro{padding:20px 12px;background:#ffffff99;border-radius:28px;}
+.hide-intro h2,.hide-finish{font-size:26px;color:#426247;}
+.hide-intro p{font-size:20px;margin:14px 0;}
+.hide-intro-art{position:relative;height:220px;max-width:280px;margin:0 auto;}
+.hide-intro-art>svg:first-child{position:absolute;width:170px;left:10px;top:0;}
+.hide-intro-art>svg:last-child{position:absolute;width:220px;right:0;bottom:0;}
+.hide-progress{display:flex;justify-content:center;gap:12px;font-size:32px;color:#8b659e;direction:ltr;margin:8px 0 20px;}
+.hide-progress .found{color:#836006;}
+.hide-field{display:grid;gap:8px;align-items:end;min-height:230px;background:linear-gradient(#dff4ff 0%,#eaf9f1 74%,#c7e9b7 74%);border:3px solid white;border-radius:28px;padding:16px 8px 12px;}
+.hide-field.two-bushes{grid-template-columns:repeat(2,minmax(0,1fr));}
+.hide-field.three-bushes{grid-template-columns:repeat(3,minmax(0,1fr));}
+.hide-bush{position:relative;height:200px;background:none;min-width:0;border-radius:22px;}
+.hide-bush:focus-visible{outline:4px solid #735091;}
+.hide-critter{position:absolute;bottom:40px;width:100%;}
+.hide-critter svg,.hide-leaves svg{width:100%;display:block;}
+.hide-leaves{position:absolute;bottom:0;width:100%;transition:transform .2s;}
+.hide-field:not(.covered) .hide-leaves{transform:translateY(8px);opacity:.6;}
+.hide-field.covered .hide-critter{visibility:hidden;}
+.hide-field.covered .hide-leaves{transform:scaleY(1.35);transform-origin:bottom;}
+.hide-field .animal-found .hide-critter{visibility:visible;}
+.hide-field .animal-found .hide-leaves{transform:translateY(15px);opacity:.25;}
+.hide-field .empty-bush{opacity:.4;}
+.hide-status{min-height:52px;font-size:22px;font-weight:700;padding:16px 0 8px;}
+.hide-controls{min-height:100px;}
+.hide-action,.hide-peek{display:block;min-width:90px;min-height:70px;border-radius:24px;padding:10px 24px;font-size:39px;margin:12px auto;background:#547f50;color:white;box-shadow:0 4px 0 #355c33;}
+.hide-peek{background:#fff;border:3px solid #735091;color:#735091;box-shadow:0 4px 0 #c4a9d3;}
+.hide-collection{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px;}
+.hide-collection>div{border-radius:20px;background:#fff9;}
+.hide-collection svg{width:100%;}
+@media(max-width:370px){.hide-field{min-height:210px;padding:8px 4px}.hide-bush{height:180px}.hide-status{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.hide-area *{animation:none!important;transition:none!important}}
