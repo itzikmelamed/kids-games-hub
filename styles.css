@@ -300,3 +300,4 @@ button { font-family: inherit; border: none; cursor: pointer; }
 .hide-collection svg{width:100%;}
 @media(max-width:370px){.hide-field{min-height:210px;padding:8px 4px}.hide-bush{height:180px}.hide-status{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.hide-area *{animation:none!important;transition:none!important}}
+.hide-critter svg{max-width:170px;margin:0 auto;}
