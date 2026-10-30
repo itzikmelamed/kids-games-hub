@@ -178,6 +178,7 @@ function renderHome() {
     { emoji: '🍎', name: 'חנות הפירות', fn: renderShop },
     { emoji: '🔤', name: 'אותיות', fn: renderLetters },
     { emoji: '🔢', name: 'מספרים', fn: renderNumbers },
+    { emoji: '🐣', name: 'חיות והגורים שלהן', fn: renderFamilies },
   ];
   games.forEach(g => {
     const c = el('button', 'game-card');

@@ -237,3 +237,32 @@ button { font-family: inherit; border: none; cursor: pointer; }
 @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
 
 .hidden { display: none !important; }
+
+/* Animal families: scoped styles, generous tap targets, no timed rounds. */
+.game-card:nth-child(7) { border-color: #89d2ba; }
+.family-area { width:100%; max-width:600px; margin:0 auto; text-align:center; }
+.family-intro { background:#fff9; border-radius:28px; padding:20px 12px; }
+.family-intro h2,.family-finish {font-size:25px;color:#536c42;}
+.family-intro p {font-size:19px;margin:12px 0;}
+.family-intro-pair {display:flex;align-items:end;justify-content:center;}
+.family-intro-pair svg {width:48%;max-width:240px;}
+.family-progress {display:flex;gap:10px;justify-content:center;margin:6px 0 12px;font-size:29px;color:#826891;direction:ltr;}
+.family-parent {width:190px;margin:auto;background:#f9fff3;border:3px solid #accb93;border-radius:32px;padding:4px 6px 10px;}
+.family-parent svg {display:block;width:100%;height:145px;}
+.family-parent-label {font-size:20px;font-weight:800;color:#426247;}
+.family-question {font-size:30px;line-height:1.2;margin:5px 0;}
+.family-choices {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.family-choice {background:#fff;border-radius:24px;border:3px solid #d8bce7;box-shadow:0 4px 0 #bda2cd;min-height:126px;padding:4px 0;transition:transform .15s;}
+.family-choice svg {display:block;width:100%;height:auto;}
+.family-choice:active {transform:scale(.95);}
+.family-choice:disabled {cursor:default;}
+.family-choice.family-retry {opacity:.4;box-shadow:none;border-style:dashed;}
+.family-choice.family-correct {border-color:#459c59;background:#deffd8;box-shadow:0 4px 0 #459c59;}
+.family-status {font-size:20px;font-weight:700;min-height:34px;padding-top:10px;}
+.family-next {display:block;background:#735091;color:white;min-width:86px;min-height:66px;border-radius:24px;font-size:36px;margin:12px auto;padding:8px 26px;box-shadow:0 4px 0 #4d3268;}
+.family-next:focus-visible,.family-choice:focus-visible {outline:4px solid #3194b5;outline-offset:4px;}
+.family-collection {display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px;}
+.family-collected {display:flex;border-radius:18px;background:#fff9;}
+.family-collected svg {width:50%;}
+@media(max-width:370px){.family-choices{gap:7px}.family-choice{min-height:108px}.family-parent{width:160px}.family-parent svg{height:125px}.family-area .family-progress{margin-bottom:6px}.topbar .pill-label{font-size:17px;padding:10px}.topbar{gap:6px;padding:8px}}
+@media(prefers-reduced-motion:reduce){.family-area *{animation:none!important;transition:none!important}}
